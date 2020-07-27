@@ -35,6 +35,8 @@ services:
       - "8080:8000"
     depends_on:
       - keycloak
+    environment:
+      KEYCLOAK_HOST: http://keycloak:8080/auth/
 
 volumes:
   keycloak_data:
