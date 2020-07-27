@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from src.auth import parse_bearer_token, AuthError
+from auth import parse_bearer_token, AuthError
 
 
 app = FastAPI(docs_url=None, redoc_url=None)
