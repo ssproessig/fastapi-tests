@@ -1,0 +1,42 @@
+version: '3'
+services:
+  # database for keycloak
+  keycloak-db:
+    image: postgres
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: dba
+      POSTGRES_PASSWORD: dba_pw
+
+  # database for keycloak
+  keycloak:
+    image: jboss/keycloak
+    ports:
+      - "8081:8080"
+    depends_on:
+      - keycloak-db
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloak-db
+      DB_DATABASE: keycloak
+      DB_SCHEMA: public
+      DB_USER: dba
+      DB_PASSWORD: dba_pw
+
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+
+  # our fastapi application
+  app:
+    image: fastapi-tests:latest
+    ports:
+      - "8080:8000"
+    depends_on:
+      - keycloak
+
+volumes:
+  keycloak_data:
+      driver: local
+
