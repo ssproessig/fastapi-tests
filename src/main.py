@@ -12,11 +12,16 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from src.auth import parse_bearer_token
+from src.auth import parse_bearer_token, AuthError
 
 
 app = FastAPI(docs_url=None, redoc_url=None)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.exception_handler(AuthError)
+def handle_auth_error(_: Request, ex: AuthError):
+    return JSONResponse(status_code=ex.status_code, content=ex.message)
 
 
 @app.get("/docs", include_in_schema=False)
