@@ -1,7 +1,24 @@
 from os import getenv
+
 from fastapi import Depends
 from fastapi.security import OAuth2AuthorizationCodeBearer, SecurityScopes
 from keycloak import KeycloakOpenID
+
+
+def wait_for_http_connection_to(KEYCLOAK_HOST):
+    import time
+    import urllib
+
+    waiting = True
+    while waiting:
+        print('.', end='')
+        try:
+            if urllib.request.urlopen(KEYCLOAK_HOST):
+                waiting = False
+                print("")
+        except:
+            time.sleep(1)
+            pass
 
 
 class AuthError(Exception):
@@ -10,11 +27,13 @@ class AuthError(Exception):
         self.status_code = status_code
 
 
-try:
-    KEYCLOAK_HOST = getenv("KEYCLOAK_HOST", "http://localhost:8080/auth/")
-    KEYCLOAK_REALM = getenv("KEYCLOAK_REALM", "master")
+KEYCLOAK_HOST = getenv("KEYCLOAK_HOST", "http://localhost:8080/auth/")
+KEYCLOAK_REALM = getenv("KEYCLOAK_REALM", "master")
 
-    print(f"Configuring Keycloak {KEYCLOAK_HOST} using realm '{KEYCLOAK_REALM}'...")
+print(f"Waiting for Keycloak {KEYCLOAK_HOST} using realm '{KEYCLOAK_REALM}'.", end='')
+wait_for_http_connection_to(KEYCLOAK_HOST)
+
+try:
     keycloak_openid = KeycloakOpenID(server_url=KEYCLOAK_HOST, realm_name=KEYCLOAK_REALM, client_id="admin")
     KEYCLOAK_WELL_KNOW = keycloak_openid.well_know()
     KEYCLOAK_CERTS = keycloak_openid.certs()
