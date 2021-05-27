@@ -44,12 +44,10 @@ def parse_accept_language(accept_language_value: str) -> List[Tuple[str, float]]
 
 
 def localized_validation_exception_handler(request, exc):
-    config = Default
-
-    for locale, q in parse_accept_language(request.headers.get("Accept-Language", "*")):
-        if locale in TRANSLATIONS:
-            config = TRANSLATIONS[locale]
-            break
+    config = next(
+        (TRANSLATIONS[locale] for locale, q in parse_accept_language(request.headers.get("Accept-Language", "*"))
+         if locale in TRANSLATIONS
+         ), Default)
 
     return JSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
