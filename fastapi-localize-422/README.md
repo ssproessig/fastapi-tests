@@ -116,3 +116,48 @@ which language the error SHALL be returned.
 ## Solution
 Make the API user request the language her request shall be processed. There is already an HTTP
 header for that: [`Accept-Language`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
+
+```
+C:\Users\ssp>curl http://localhost:8000/foos -s -H "Accept-Language:de,en" -X POST -d "{\"name\":\"01234567890\",\"tags\":[null]}" | jq .
+```
+
+```json
+{
+  "detail": [
+    {
+      "loc": [
+        "body",
+        "name"
+      ],
+      "msg": "Wert darf höchstens 10 Zeichen haben",
+      "type": "value_error.any_str.max_length",
+      "ctx": {
+        "limit_value": 10
+      }
+    },
+    {
+      "loc": [
+        "body",
+        "tags",
+        0
+      ],
+      "msg": "(kein Wert) ist kein erlaubter Wert",
+      "type": "type_error.none.not_allowed"
+    }
+  ]
+}
+
+```
+
+To get this, add an `exception_handler` for `RequestValidationError` to your `app`
+
+```python
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return localized_validation_exception_handler(request, exc)
+```
+
+and use [`localized_validation_exception_handler`](src/localization/__init__.py) for it.
+
+Load your translations into the `Config` facades using something like
+[babel](http://babel.pocoo.org/en/latest/), to not hard-code the translations.

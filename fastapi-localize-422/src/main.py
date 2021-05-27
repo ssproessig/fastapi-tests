@@ -3,11 +3,17 @@ from uuid import UUID, uuid4
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
 
 from localization import localized_validation_exception_handler
 
 app = FastAPI(docs_url=None, redoc_url=None)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return localized_validation_exception_handler(request, exc)
 
 
 class FooCreate(BaseModel):
