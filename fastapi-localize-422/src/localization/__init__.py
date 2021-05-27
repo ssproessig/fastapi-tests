@@ -31,13 +31,16 @@ def parse_accept_language(accept_language_value: str) -> List[Tuple[str, float]]
     for language in languages:
         language_split = language.split(";")
         locale = language_split[0].strip()
-        if len(language_split) == 1:
-            locale_q_pairs.append((locale, 1.0))
-        else:
-            try:
-                q = float(language_split[1][2:])
-            except ValueError:
-                q = 0.0
+
+        if locale:
+            if len(language_split) == 1:
+                q = 1.0
+            else:
+                try:
+                    q = float(language_split[1][2:])
+                except ValueError:
+                    q = 0.0
+
             locale_q_pairs.append((locale, q))
 
     return sorted(locale_q_pairs, key=lambda p: p[1], reverse=True)
